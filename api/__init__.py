@@ -1,6 +1,6 @@
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
-from flask import request, jsonify, abort, make_response
+from flask import request, jsonify, abort, make_response, render_template
 from instance.config import app_config
 
 db = SQLAlchemy()
@@ -13,8 +13,18 @@ def create_app(config_name):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
+    @app.route('/')
+    def index():
+        """
+        Home.
+        """
+        return render_template('doc.html')
+
     @app.route('/api/v1/bucketlists/', methods=['GET', 'POST'])
     def bucketlists():
+        """
+        This method retrieves all bucketlists and bucket list items.
+        """
         auth_header = request.headers.get('Authorization')
         if auth_header:
             access_token = auth_header.split(" ")[1]
@@ -91,6 +101,9 @@ def create_app(config_name):
 
     @app.route('/api/v1/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def bucketlist_manipulation(id):
+        """
+        This method retrieves a single bucketlist and  its bucket list items.
+        """
         auth_header = request.headers.get('Authorization')
 
         if auth_header:
@@ -157,6 +170,9 @@ def create_app(config_name):
 
     @app.route('/api/v1/bucketlists/<int:bucket_id>/items/', methods=['POST'])
     def add_items(bucket_id):
+        """
+        This method creates a bucketlist item.
+        """
         auth_header = request.headers.get('Authorization')
         if auth_header:
             access_token = auth_header.split(" ")[1]
@@ -194,6 +210,9 @@ def create_app(config_name):
 
     @app.route('/api/v1/bucketlists/<int:id>/items/<int:item_id>', methods=['PUT', 'DELETE'])
     def item_manipulation(id, item_id):
+        """
+        This method updates a bucket list item.
+        """
         auth_header = request.headers.get('Authorization')
         if auth_header:
             access_token = auth_header.split(" ")[1]
