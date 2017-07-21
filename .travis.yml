@@ -1,3 +1,7 @@
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database testdb;' -U postgres
 language: python
 python:
   - "3.6"
