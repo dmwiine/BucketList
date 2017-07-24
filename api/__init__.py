@@ -64,6 +64,7 @@ def create_app(config_name):
                                 obj = {
                                     'id': item.id,
                                     'name': item.name,
+                                    'done': item.done,
                                     'date_created': item.date_created,
                                     'date_modified': item.date_modified,
                                     'done': item.done
@@ -72,6 +73,7 @@ def create_app(config_name):
                             bucket = {
                                 'id': bucketlist.id,
                                 'name': bucketlist.name,
+                                'created_by': bucketlist.created_by,
                                 'date_created': bucketlist.date_created,
                                 'date_modified': bucketlist.date_modified,
                                 'items': items
@@ -97,6 +99,7 @@ def create_app(config_name):
                         response.update({'bucketlist':{
                             'id': bucketlist.id,
                             'name': bucketlist.name,
+                            'created_by': bucketlist.created_by,
                             'date_created': bucketlist.date_created,
                             'date_modified': bucketlist.date_modified,
                             'items': []
@@ -140,6 +143,7 @@ def create_app(config_name):
                     response = jsonify({
                         'id': bucketlist.id,
                         'name': bucketlist.name,
+                        'created_by': bucketlist.created_by,
                         'date_created': bucketlist.date_created,
                         'date_modified': bucketlist.date_modified
                     })
@@ -152,6 +156,7 @@ def create_app(config_name):
                         obj = {
                             'id': item.id,
                             'name': item.name,
+                            'done': item.done,
                             'date_created': item.date_created,
                             'date_modified': item.date_modified,
                             'done': item.done
@@ -160,6 +165,7 @@ def create_app(config_name):
                     response = jsonify({
                         'id': bucketlist.id,
                         'name': bucketlist.name,
+                        'created_by': bucketlist.created_by,
                         'date_created': bucketlist.date_created,
                         'date_modified': bucketlist.date_modified,
                         'items': items
@@ -203,6 +209,7 @@ def create_app(config_name):
                     response.update({'item': {
                         'id': item.id,
                         'name': item.name,
+                        'done': item.done,
                         'bucketlist_id':item.bucketlist_id,
                         'date_created': item.date_created,
                         'date_modified': item.date_modified
@@ -233,18 +240,24 @@ def create_app(config_name):
                     abort(404)
                 if request.method == 'PUT':
                     item_name = str(request.data.get('name', ''))
+                    item_done = str(request.data.get('done'))
                     if item_name:
                         item.name = item_name
-                        item.save()
-                        response = jsonify({
-                            'id': item.id,
-                            'name': item.name,
-                            'bucketlist_id':item.bucketlist_id,
-                            'date_created': item.date_created,
-                            'date_modified': item.date_modified
-                        })
-                        response.status_code = 200
-                        return response
+                    if item_done:
+                        item.done = item_done
+                    else:
+                        item.done = False
+                    item.save()
+                    response = jsonify({
+                        'id': item.id,
+                        'name': item.name,
+                        'done': item.done,
+                        'bucketlist_id':item.bucketlist_id,
+                        'date_created': item.date_created,
+                        'date_modified': item.date_modified
+                    })
+                    response.status_code = 200
+                    return response
                 else:
                     # DELETE
                     item.delete()
