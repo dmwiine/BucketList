@@ -118,10 +118,11 @@ class Items(db.Model):
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
     done = db.Column(db.Boolean)
 
-    def __init__(self, name, bucket_id):
+    def __init__(self, name, bucket_id, done=False):
         """initialize with name and bucketlist_id."""
         self.name = name
         self.bucketlist_id = bucket_id
+        self.done = done
 
     def save(self):
         """This method saves a new bucketlist item into the database"""
