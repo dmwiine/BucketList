@@ -1,7 +1,7 @@
 import os
-from api import db,create_app
-from flask_bcrypt import Bcrypt
 from datetime import datetime, timedelta
+from api import db, create_app
+from flask_bcrypt import Bcrypt
 import jwt
 
 class User(db.Model):
@@ -76,7 +76,7 @@ class Bucketlist(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
     def __init__(self, name, created_by):
-        """initialize with name."""
+        """initialize with name and created_by."""
         self.name = name
         self.created_by = created_by
 
@@ -107,6 +107,8 @@ class Bucketlist(db.Model):
 
 
 class Items(db.Model):
+    """This class defines the items table """
+
     __tablename__ = 'BucketlistItems'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(200))
@@ -116,11 +118,13 @@ class Items(db.Model):
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
     done = db.Column(db.Boolean)
 
-    def __init__(self, name, id):
+    def __init__(self, name, bucket_id):
+        """initialize with name and bucketlist_id."""
         self.name = name
-        self.bucketlist_id = id
+        self.bucketlist_id = bucket_id
 
     def save(self):
+        """This method saves a new bucketlist item into the database"""
         db.session.add(self)
         db.session.commit()
 
