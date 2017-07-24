@@ -164,7 +164,10 @@ class BucketlistTestCase(unittest.TestCase):
         item_response = self.client().put(
             '/api/v1/bucketlists/1/items/1',
             headers=dict(Authorization="Bearer " + access_token),
-            data={'name': 'Go white water rafting on the nile'}
+            data={
+                'name': 'Go white water rafting on the nile',
+                'done': False
+            }
         )
         self.assertEqual(item_response.status_code, 200)
     
