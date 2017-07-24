@@ -21,16 +21,16 @@ class AuthTestCase(unittest.TestCase):
 
     def test_registration(self):
         """Test user registration works correcty."""
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         result = json.loads(res.data.decode())
         self.assertEqual(result['message'], "You registered successfully. Please log in.")
         self.assertEqual(res.status_code, 201)
 
     def test_already_registered_user(self):
         """Test that a user cannot be registered twice."""
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
-        second_res = self.client().post('/auth/register', data=self.user_data)
+        second_res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(second_res.status_code, 202)
         result = json.loads(second_res.data.decode())
         self.assertEqual(
@@ -38,9 +38,9 @@ class AuthTestCase(unittest.TestCase):
 
     def test_user_login(self):
         """Test registered user can login."""
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
-        login_res = self.client().post('/auth/login', data=self.user_data)
+        login_res = self.client().post('/api/v1/auth/login', data=self.user_data)
 
         result = json.loads(login_res.data.decode())
         self.assertEqual(result['message'], "You logged in successfully.")
@@ -53,7 +53,7 @@ class AuthTestCase(unittest.TestCase):
             'email': 'not_a_user@example.com',
             'password': 'nope'
         }
-        res = self.client().post('/auth/login', data=not_a_user)
+        res = self.client().post('/api/v1/auth/login', data=not_a_user)
         result = json.loads(res.data.decode())
 
         self.assertEqual(res.status_code, 401)
