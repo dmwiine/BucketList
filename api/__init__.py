@@ -20,19 +20,23 @@ def create_app(config_name):
         """
         return render_template('doc.html')
 
+    def _get_access_token():
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            access_token = auth_header.split(" ")[1]
+            return access_token
+        else:
+            response = {'message': "Access denied. Please login."}
+            response.update({'status_code': '401'})
+            return jsonify(response)
+
     @app.route('/api/v1/bucketlists/', methods=['GET', 'POST'])
     def bucketlists():
         """
         This method retrieves all bucketlists and bucket list items.
         """
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            access_token = auth_header.split(" ")[1]
-        else:
-            response = {'message': "Access denied. Please login."}
-            response.update({'status_code': '401'})
-            return jsonify(response)
-        if access_token:
+        access_token = _get_access_token()
+        if isinstance(access_token, str):
             user_id = User.decode_token(access_token)
             if not isinstance(user_id, str):
                 if request.method == 'GET':
@@ -90,30 +94,31 @@ def create_app(config_name):
                         bucketlist = Bucketlist(name, user_id)
                         bucketlist.save()
                         response = {'message': "Successfully Created"}
+                        response.update({'bucketlist':{
+                            'id': bucketlist.id,
+                            'name': bucketlist.name,
+                            'date_created': bucketlist.date_created,
+                            'date_modified': bucketlist.date_modified,
+                            'items': []
+                        }})
                         response.update({'status_code':'201'})
                         return jsonify(response)
+            else:
+                message = user_id
+                response = {
+                    'message': message
+                }
+                return make_response(jsonify(response)), 401
         else:
-            message = user_id
-            response = {
-                'message': message
-            }
-            return make_response(jsonify(response)), 401
+            return access_token
 
     @app.route('/api/v1/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def bucketlist_manipulation(id):
         """
-        This method retrieves a single bucketlist and  its bucket list items.
+        This method retrieves, updates or deletets a single bucketlist and  its bucket list items.
         """
-        auth_header = request.headers.get('Authorization')
-
-        if auth_header:
-            access_token = auth_header.split(" ")[1]
-        else:
-            response = {'message': "Access denied. Please login."}
-            response.update({'status_code': '401'})
-            return jsonify(response)
-
-        if access_token:
+        access_token = _get_access_token()
+        if isinstance(access_token, str):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
@@ -161,26 +166,22 @@ def create_app(config_name):
                     })
                     response.status_code = 200
                     return response
+            else:
+                message = user_id
+                response = {
+                    'message': message
+                }
+                return make_response(jsonify(response)), 401
         else:
-            message = user_id
-            response = {
-                'message': message
-            }
-            return make_response(jsonify(response)), 401
+            return access_token
 
     @app.route('/api/v1/bucketlists/<int:bucket_id>/items/', methods=['POST'])
     def add_items(bucket_id):
         """
         This method creates a bucketlist item.
         """
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            access_token = auth_header.split(" ")[1]
-        else:
-            response = {'message': "Access denied. Please login."}
-            response.update({'status_code': '401'})
-            return jsonify(response)
-        if access_token:
+        access_token = _get_access_token()
+        if isinstance(access_token, str):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
@@ -188,7 +189,7 @@ def create_app(config_name):
                 if bucketlist is None:
                     abort(404)
                 items = bucketlist.items
-                item_name = request.data.get('name')
+                item_name = request.data.get('name', '')
                 item_check = [item.name for item in items if item.name == item_name]
                 if item_check:
                     response = jsonify({'Warning': 'this item already exists in the bucketlist'})
@@ -199,28 +200,31 @@ def create_app(config_name):
                     item = Items(item_name, bucket_id)
                     item.save()
                     response = {'message': "Bucketlist item successfully Created"}
+                    response.update({'item': {
+                        'id': item.id,
+                        'name': item.name,
+                        'bucketlist_id':item.bucketlist_id,
+                        'date_created': item.date_created,
+                        'date_modified': item.date_modified
+                    }})
                     response.update({'status_code':'201'})
                     return jsonify(response)
+            else:
+                message = user_id
+                response = {
+                    'message': message
+                }
+                return make_response(jsonify(response)), 401
         else:
-            message = user_id
-            response = {
-                'message': message
-            }
-            return make_response(jsonify(response)), 401
+            return access_token
 
     @app.route('/api/v1/bucketlists/<int:id>/items/<int:item_id>', methods=['PUT', 'DELETE'])
     def item_manipulation(id, item_id):
         """
-        This method updates a bucket list item.
+        This method updates or deletes a bucket list item.
         """
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            access_token = auth_header.split(" ")[1]
-        else:
-            response = {'message': "Access denied. Please login."}
-            response.update({'status_code': '401'})
-            return jsonify(response)
-        if access_token:
+        access_token = _get_access_token()
+        if isinstance(access_token, str):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
@@ -228,7 +232,7 @@ def create_app(config_name):
                 if item is None:
                     abort(404)
                 if request.method == 'PUT':
-                    item_name = str(request.data.get('name'))
+                    item_name = str(request.data.get('name', ''))
                     if item_name:
                         item.name = item_name
                         item.save()
@@ -247,7 +251,15 @@ def create_app(config_name):
                     response = {'message': "Item {} deleted successfully".format(item.name)}
                     response.update({'status_code':'200'})
                     return jsonify(response)
-
+            else:
+                message = user_id
+                response = {
+                    'message': message
+                }
+                return make_response(jsonify(response)), 401
+        else:
+            return access_token
+    
     from .v1.auth import auth_blueprint
     app.register_blueprint(auth_blueprint)
     return app
