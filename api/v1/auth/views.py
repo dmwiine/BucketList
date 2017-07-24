@@ -8,7 +8,7 @@ class RegistrationView(MethodView):
     """This class registers a new user."""
 
     def post(self):
-        """Handle POST request for this view. Url ---> /auth/register"""
+        """Handle POST request for this view. Url ---> /api/v1/auth/register"""
 
         user = User.query.filter_by(email=request.data['email']).first()
 
@@ -46,7 +46,7 @@ class LoginView(MethodView):
     """This class-based view handles user login and access token generation."""
 
     def post(self):
-        """Handle POST request for this view. Url ---> /auth/login"""
+        """Handle POST request for this view. Url ---> /api/v1/auth/login"""
         try:
             user = User.query.filter_by(email=request.data['email']).first()
             if user and user.is_valid(request.data['password']):
@@ -73,12 +73,12 @@ registration_view = RegistrationView.as_view('registration_view')
 login_view = LoginView.as_view('login_view')
 
 auth_blueprint.add_url_rule(
-    '/auth/register',
+    '/api/v1/auth/register',
     view_func=registration_view,
     methods=['POST'])
 
 auth_blueprint.add_url_rule(
-    '/auth/login',
+    '/api/v1/auth/login',
     view_func=login_view,
     methods=['POST']
 )
