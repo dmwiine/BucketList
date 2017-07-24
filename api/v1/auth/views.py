@@ -20,11 +20,9 @@ class RegistrationView(MethodView):
                 user = User(email=email, password=password)
                 user.save()
 
-                #auth_token = user.generate_token(user.id)
                 response = {
                     'status': 'success',
-                    'message': 'You registered successfully. Please log in.',
-                    #'auth_token': auth_token.decode()
+                    'message': 'You registered successfully. Please log in.'
                 }
                 return make_response(jsonify(response)), 201
             except Exception as e:
