@@ -1,8 +1,11 @@
+import re
 from api.v1.models import User
 from . import auth_blueprint
 
 from flask.views import MethodView
 from flask import make_response, request, jsonify
+
+EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 class RegistrationView(MethodView):
     """This class registers a new user."""
@@ -15,8 +18,24 @@ class RegistrationView(MethodView):
         if not user:
             try:
                 post_data = request.data
-                email = post_data['email']
-                password = post_data['password']
+                email = post_data['email'].strip()
+                password = post_data['password'].strip()
+                if not EMAIL_REGEX.match(email):
+                    response = jsonify({
+                    'error': 'Please enter a valid email',
+                    'status_code': '400'
+                    })
+                    response.status_code = 400
+                    return response
+
+                if len(password) < 6:
+                    response = jsonify({
+                        'Error': 'Invalid password, it must be more than 6 characters',
+                        'status_code': '400'
+                        })
+                    response.status_code = 400
+                    return response
+
                 user = User(email=email, password=password)
                 user.save()
 
@@ -57,7 +76,8 @@ class LoginView(MethodView):
                     return make_response(jsonify(response)), 200
             else:
                 response = {
-                    'message': 'Invalid email or password, Please try again'
+                    'message': 'Invalid email or password, Please try again',
+                    'status_code': '401'
                 }
                 return make_response(jsonify(response)), 401
 
