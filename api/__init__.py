@@ -11,7 +11,29 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.url_map.strict_slashes = False
     db.init_app(app)
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        response = jsonify({'error': 'The request can not be linked to, Please check your endpoint url'})
+        response.status_code = 404
+        return response
+
+
+    # 405 error handler
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        response = jsonify({'error': 'Invalid request method. Please check the request method being used'})
+        response.status_code = 405
+        return response
+
+    # 500 error handler
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        response = jsonify({'error': 'Error, Server currently down, please restart the server to use the bucketlist API'})
+        response.status_code = 500
+        return response
 
     @app.route('/')
     def index():
@@ -91,8 +113,8 @@ def create_app(config_name):
                         return jsonify(response)
                 else:
                     # POST
-                    name = request.data.get('name', '')
-                    if name:
+                    name = request.data.get('name')
+                    if not name is None:
                         bucketlist = Bucketlist(name, user_id)
                         bucketlist.save()
                         response = {'message': "Successfully Created"}
@@ -125,9 +147,14 @@ def create_app(config_name):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
-                bucketlist = Bucketlist.query.filter_by(id=id).first()
-                if bucketlist is None:
-                    abort(404)
+                bucketlist = Bucketlist.query.filter_by(id=id, created_by=user_id).first()
+                if not bucketlist:
+                    response = jsonify({
+                        'message': "Bucketlist not found",
+                        'status_code':'404'
+                        })
+                    response.status_code = 404
+                    return response
 
                 if request.method == 'DELETE':
                     bucketlist.delete()
@@ -191,18 +218,23 @@ def create_app(config_name):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
-                bucketlist = Bucketlist.query.filter_by(id=bucket_id).first()
-                if bucketlist is None:
-                    abort(404)
+                bucketlist = Bucketlist.query.filter_by(id=bucket_id, created_by=user_id).first()
+                if not bucketlist:
+                    response = jsonify({
+                        'message': "Bucketlist not found",
+                        'status_code':'404'
+                        })
+                    response.status_code = 404
+                    return response
                 items = bucketlist.items
-                item_name = request.data.get('name', '')
+                item_name = request.data.get('name')
                 item_check = [item.name for item in items if item.name == item_name]
                 if item_check:
                     response = jsonify({'Warning': 'this item already exists in the bucketlist'})
                     response.status_code = 409
                     return response
 
-                if item_name:
+                if not item_name is None:
                     item = Items(item_name, bucket_id)
                     item.save()
                     response = {'message': "Bucketlist item successfully Created"}
@@ -235,18 +267,23 @@ def create_app(config_name):
             user_id = User.decode_token(access_token)
 
             if not isinstance(user_id, str):
-                item = Items.query.filter_by(id=item_id).first()
+                item = Items.query.filter_by(id=item_id, bucketlist_id=id).first()
                 if item is None:
-                    abort(404)
+                    response = jsonify({
+                        'message': "Item not found",
+                        'status_code':'404'
+                        })
+                    response.status_code = 404
+                    return response
                 if request.method == 'PUT':
                     item_name = str(request.data.get('name', ''))
-                    item_done = str(request.data.get('done'))
+                    item_done = request.data.get('done')
                     if item_name:
                         item.name = item_name
                     if item_done:
                         item.done = item_done
-                    else:
-                        item.done = False
+                    # else:
+                    #     item.done = False
                     item.save()
                     response = jsonify({
                         'id': item.id,
