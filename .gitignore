@@ -1,2 +1,10 @@
 Bucketlist/
 __pycache__/
+
+# misc
+.DS_Store
+.env
+*.pyc
+.coverage
+.cache/
+.vscode/

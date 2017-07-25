@@ -1,0 +1,296 @@
+FORMAT: 1A
+
+# Bucket List
+Bucket List service help you create buckets. What is a Bucket List you ask.
+well a Bucket List is a list of things that one has not done before but wants to do before dying.
+
+## Specifics
+The endpoints of the API require authentication except login and register.
+
+## User Endpoints
+
+### Create a new user  [POST /api/v1/auth/register]
+
+- Creates a new user.
+- You need to be registered, before you create a bucket.
+- The following fields are required:
+
+
++ Email address
++ Password
+
+
++ Request (application/json)
+
+      {
+
+            "email": "admin@gmail.com",
+            "password": "password123"
+
+      }
+
++ Response 201 (application/json)
+        {
+            'status': 'success',
+            'message': 'You registered successfully. Please log in.'
+        }
+
+### Login a User [POST /api/v1/auth/login]
+
+Logs in an existing user.
+
+- The following fields are required:
++ Username
++ Password
+
++ Request (application/json)
+
+          {
+                "username": "admin@gmail.com",
+                "password": "password123"
+          }
+
++ Response 200 (application/json)
+
+         {
+              "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTk4NTEwODEsImlhdCI6MTQ5OTg0ODM4MSwibmJmIjoxNDk5ODQ4MzgxLCJqdGkiOiIxMTFlNzFmYS0xZWIxLTRlOWMtYmJkNy1lMzZlNTZlMjFkZjEiLCJpZGVudGl0eSI6IlNoYXJvbiIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyIsInVzZXJfY2xhaW1zIjp7fX0.AW1q3QWC6MqOs44NVU3DCQo25m4u3DJBAuCxmVgsz4M",
+              "msg": "You logged in successfully."
+         }
+
+### Create  Bucketlists [POST /api/v1/bucketlists/]
+
+You Can Create a Bucket
++ Requires authentication
+
++ Request  (application/json)
+
+        {
+             "name": "Before I turn 30."
+        }
+
++ Response 201 (application/json)
+
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 12:18:13 GMT",
+            "date_modified": "Wed, 12 Jul 2017 12:18:13 GMT",
+            "id": 5,
+            "name": "Before I turn 30.",
+            "items": []
+        }
+
+### Get all bucketlists [GET /api/v1/bucketlists/]
+
+Get all bucketlist for the logged in user
+
++ Requires authentication
+
++ Response 200 (application/json)
+
+        {
+            "buckets": [
+                {
+                    "created_by": 4,
+                    "date_created": "Wed, 12 Jul 2017 12:18:13 GMT",
+                    "date_modified": "Wed, 12 Jul 2017 12:18:13 GMT",
+                    "id": 5,
+                    "items": [],
+                    "name": "Before I turn 30"
+                },
+                {
+                    "created_by": 4,
+                    "date_created": "Wed, 12 Jul 2017 13:32:54 GMT",
+                    "date_modified": "Wed, 12 Jul 2017 13:32:54 GMT",
+                    "id": 6,
+                    "items": [],
+                    "name": "Rome"
+                },
+                {
+                    "created_by": 4,
+                    "date_created": "Wed, 12 Jul 2017 13:33:32 GMT",
+                    "date_modified": "Wed, 12 Jul 2017 13:33:32 GMT",
+                    "id": 7,
+                    "items": [],
+                    "name": "The Maldives"
+                },
+                {
+                    "created_by": 4,
+                    "date_created": "Wed, 12 Jul 2017 13:34:07 GMT",
+                    "date_modified": "Wed, 12 Jul 2017 13:34:07 GMT",
+                    "id": 8,
+                    "items": [],
+                    "name": "Career"
+                },
+                {
+                    "created_by": 4,
+                    "date_created": "Wed, 12 Jul 2017 13:34:23 GMT",
+                    "date_modified": "Wed, 12 Jul 2017 13:34:23 GMT",
+                    "id": 9,
+                    "items": [],
+                    "name": "Zoo"
+                }
+            ]
+        }
+### Get a specific bucket [GET /api/v1/bucketlists/:id]
+
+Displays a specific bucket i.e, `/api/v1/bucketlist/5`
++ Requires authentication
+
++ Response 200 (application/json)
+
+    {
+        "created_by": 4,
+        "date_created": "Wed, 12 Jul 2017 12:18:13 GMT",
+        "date_modified": "Wed, 12 Jul 2017 12:18:13 GMT",
+        "id": 5,
+        "items": [],
+        "name": "Before I turn 30"
+    }
+### Updates a bucketlist information [PUT /api/v1/bucketlists/:id]
+
+Update details of a user whose id is specified, i.e `/api/v1/bucketlists/5`
++ Requires authentication
+
++ Request (application/json)
+
+        {
+            "name": "Before I turn 50"
+        }
+
++ Response 200 (application/json)
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 12:18:13 GMT",
+            "date_modified": "Wed, 12 Jul 2017 13:54:16 GMT",
+            "id": 5,
+            "items": [],
+            "name": "Before I turn 50"
+        }
+
+
+### Delete a Bucket [DELETE /api/v1/bucketlists/:id]
+
+Deletes a bucketlist whose id is specified, i.e `/api/v1/bucketlists/4`
++ Requires authentication
+
++ Response 200 (application/json)
+    {
+         "message": "bucketlist Rome deleted successfully."
+    }
+- If the bucketlist does not exist:
+
++ Response 404 (application/json)
+          {
+            "message": "Bucketlist not Found"
+          }
+
+### Create an item [POST /api/v1/bucketlist/:id/items]
+
+Create an item or items using an id of a bucket, i.e `/api/v1/bucketlist/9/items/`
+
++ Request (application/json)
+    {
+        "name": "Go bungee jumping."
+    }
+
++ Response 201 (application/json)
+
+    {
+    "date_created": "Wed, 12 Jul 2017 14:13:26 GMT",
+    "date_modified": "Wed, 12 Jul 2017 14:13:26 GMT",
+    "done": false,
+    "id": 2,
+    "name": "Go bungee jumping.",
+    "bucketlist_id": 9
+}
+
+
+### Update an item [PUT /api/v1/bucketlist/:id/items/:id]
+
+Edit an Item, i.e `/api/v1/bucketlist/9/items/1`
+
++ Request
+
+  {
+      'done': True
+  }
+
++ Response 200 (application/json)
+
+    {
+    "date_created": "Wed, 12 Jul 2017 14:13:26 GMT",
+    "date_modified": "Thur, 13 Jul 2017 17:00:55 GMT",
+    "done": True,
+    "id": 2,
+    "name": "fight with a lion"
+}
+
+### Delete an item [PUT /api/v1/bucketlist/:id/items/:id]
+
+Delete an Item, i.e `/api/v1/bucketlist/9/items/1`
+
++ Response 200 (application/json)
+
+    {
+        "message": "Item fight with a lion deleted successfully"
+    }
+
+### Pagination for BucketList [GET /api/v1/bucketlists/?limit=3]
+
+- Lists bucketlists existing for authenticated user with limit.
+- For example: `/api/v1/bucketlist/?limit=3`
+
++ Requires authentication
+
++ Response 200 (application/json)
+  {
+    "buckets": [
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 13:32:54 GMT",
+            "date_modified": "Wed, 12 Jul 2017 13:32:54 GMT",
+            "id": 6,
+            "items": [],
+            "name": "Career"
+        },
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 13:33:32 GMT",
+            "date_modified": "Wed, 12 Jul 2017 13:33:32 GMT",
+            "id": 7,
+            "items": [],
+            "name": "Rome"
+        },
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 13:34:07 GMT",
+            "date_modified": "Wed, 12 Jul 2017 13:34:07 GMT",
+            "id": 8,
+            "items": [],
+            "name": "Maldives"
+        }
+    ]
+}
+
+    }
+
+### Pagination for BucketList [GET /api/v1/bucketlists/?q=Rome]
+
+- Query bucketlists.
+- For example: `/api/v1/bucketlist/?q=Rome`
+
++ Requires authentication
+
++ Response 200 (application/json)
+ {
+    "buckets": [
+        {
+            "created_by": 4,
+            "date_created": "Wed, 12 Jul 2017 13:32:54 GMT",
+            "date_modified": "Wed, 12 Jul 2017 13:32:54 GMT",
+            "id": 7,
+            "items": [],
+            "name": "Rome"
+        }
+    ]
+}

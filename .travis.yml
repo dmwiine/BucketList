@@ -1,0 +1,14 @@
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database testdb;' -U postgres
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+script:
+  - nosetests -v --with-coverage --cover-package=api
+after_success: coveralls
+cache: pip
